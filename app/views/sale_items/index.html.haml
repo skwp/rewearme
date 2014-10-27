@@ -1,0 +1,91 @@
+- content_for :head do
+  %title RewearMe!
+  <meta property="og:title" content="RewearMe"/>
+  <meta property="og:url" content="http://www.rewear.me">
+  <meta property="og:site_name" content="RewearMe"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:description" content="Lightly used high end fashion at affordable prices. Great deals on used high end fashion items. A.P.C., Wings & Horns, Zegna, Band of Outsiders, Rick Owens DRKSHDW"/>
+
+- content_for :header do
+  = render :partial => 'google_ads_header'
+
+  .logo
+    .wrapper
+      %h1= link_to "RewearMe", root_url
+  %nav
+    .wrapper
+      .top-menu
+        %ul
+          %li
+            <div class="fb-like" data-href="http://rewear.me" data-send="false" data-layout="button_count" data-width="100" data-show-faces="false"></div>
+          %li
+            %strong I want to spend up to $
+            = text_field_tag('price_filter')
+            on
+            %strong= link_to_unless params[:category] == 'All', "Anything", :category => 'All'
+            &middot;
+            %strong= link_to_unless_current "Streetwear", :category => 'streetwear', :brand => nil
+            &middot;
+            %strong= link_to_unless_current "Upscale/Formal", :category => 'formal', :brand => nil
+            &middot;
+            %strong= link_to_unless_current "Shoes", :category => 'shoes', :brand => nil
+
+- content_for :sidebar do
+  %input{:type => 'search', :id => 'query', :name => 'query', :results => 10, :name => 10}
+  %h2 Brands
+  - @brands.map do |brand|
+    %h3= link_to_unless_current brand, url_for(:brand => brand, :category => nil)
+  %h2 Categories
+  - @categories.map do |category|
+    %h3= link_to_unless_current category.titleize, url_for(:category => category, :brand => nil)
+
+  %br
+  %h3= link_to "Show All Items", root_url
+
+.wrapper
+  #masonry
+    - ad_shown = false
+    - @sale_items.each_with_index do |item, idx|
+      - if idx == 3
+        .item
+          .hires-thumbnail.google
+            <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>
+          .item-footer
+            .item-footer-inner
+              Sponsored Link
+
+      .item{'data-id' => item.id, 'data-hires' => item.images.first}
+        .hires-thumbnail= image_tag( item.hires_thumbnail, :alt => "#{item.title} thumbnail")
+        %a.images_link= pluralize item.images.count, 'image', 'images'
+        %h2.price
+          %span>= currency_symbol.html_safe
+          - money = Money.parse(item.price)
+
+          %span.price_in_currency= money.exchange_to(params[:currency] || "USD") rescue ""
+          - if params[:currency].upcase != money.currency.to_s.upcase
+            %span.original_price= "(#{item.price})"
+        %h2.title= link_to item.title.html_safe, item.url
+        %p= item.description.html_safe
+        .item-footer
+          .item-footer-inner
+            via
+            = link_to item.source_site, item.url
+
+
+  .footer{:style => 'width:80%; margin: 0 auto'}
+    %table
+      %tr
+        %td.contact
+          &copy; 2012
+          = link_to "Yan Pritzker", "http://yanpritzker.com"
+          &middot;
+          =mail_to "contact@rewear.me", "Contact", :encode=> 'hex'
+        %td.prices
+          %strong Prices:
+          = link_to_unless (params[:currency] == 'USD'), country_flag("us") + " USD", :currency => 'USD'
+          = link_to_unless_current(country_flag("gb") + " GBP", :currency => 'GBP')
+          = link_to_unless_current(country_flag("au") + " AUD", :currency => 'AUD')
+          = link_to_unless_current(country_flag("europeanunion") + " EUR", :currency => 'EUR')
+      %tr
+        %td{:colspan => "100%"}
+          %p RewearMe is a search engine and browser for lightly used high end fashion at affordable prices pulled from all over the web. Great deals on hot brands like Raleigh Denim, Common Projects, Penfield, Gitman Vintage, Filippa K, Creative Recreation, Rag &amp; Bone, APC, Wings &amp; Horns, Engineered Garments, Rogan, Obedient Sons, Margiela, Jil Sander, Dries van Noten, NdG, Nom de Guerre, Helmet of the Will, Splendid Mills, Comme des Garcons, CdG, Junya Watanabe, Phillip Lim, Robert Geller, Helmut Lang, Jas MB, Ksubi, McQ, Autumn Cashmere, Free City.
